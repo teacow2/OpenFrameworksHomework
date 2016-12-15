@@ -49,7 +49,11 @@ public:
 
 	int health; 
 
-	int damage; 
+	int damMin;
+
+	int damMax; 
+
+	int tarNum; 
 
 	bool playerShip; 
 

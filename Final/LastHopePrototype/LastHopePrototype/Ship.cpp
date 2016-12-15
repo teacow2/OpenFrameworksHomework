@@ -37,8 +37,9 @@ void Ship::setup(bool _player,  int _type, ofPoint _pos, int _id) {
 		// mothership attacker
 		target.push_back(0); // mothership
 		speedMod = .02; 
-		health = 50; 
-		damage = 20; 
+		health = 50;
+		damMin = 1; 
+		damMax = 2; 
 		attFreq = 500; 
 		break; 
 	case 2: 
@@ -46,8 +47,9 @@ void Ship::setup(bool _player,  int _type, ofPoint _pos, int _id) {
 		target.push_back(1); // ship
 		target.push_back(0); // mothership 
 		speedMod = .03; 
-		health = 30; 
-		damage = 10;
+		health = 30;
+		damMin = 1; //7
+		damMax = 2; //10
 		attFreq = 250; 
 		break; 
 	}
@@ -100,7 +102,7 @@ void Ship::calcForce() {
 
 	pos += vel;
 
-	rotateAngle = atan2f(vel.y, vel.x) * 180 / PI;
+	rotateAngle = atan2f(vel.y, vel.x) * 180;
 }
 
 

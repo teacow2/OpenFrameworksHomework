@@ -11,13 +11,13 @@ void ofApp::setup(){
 
 	gameOver = false; 
 
-	step = .01; 
-
+	step = .001; 
+	
 	spacing = 150; 
 	targetBarrier = 500;
 	
-	enemyThres = ofRandom(1500, 1750);
-
+	//enemyThres = ofRandom(1500, 1750);
+	enemyThres = ofRandom(500, 750);
 	// enemyThres = 1000000000; // test value 
 
 	enemyShipCount = 0; 
@@ -51,16 +51,13 @@ void ofApp::update(){
 			ships.push_back(s);
 			currentWidth += spacing; if (currentWidth > ofGetWidth()) currentWidth = baseWidth;
 			enemyShipCount = 0;
-			//enemyThres = ofRandom(1500, 1750);
-			enemyThres = 10000000; // test value
+			enemyThres = ofRandom(1500, 1750);
+			//enemyThres = 10000000; // test value
 			shipID++;
 		}
 
 		swarmMove();
 
-		fireShots();
-
-		killShips();
 
 		for (int i = 0; i < shots.size(); i++) {
 
@@ -95,6 +92,11 @@ void ofApp::update(){
 			//	cout << "Current force on ship " << i << ": " << ships[i].force << endl; 
 
 			ships[i].calcForce();
+
+			fireShots();
+
+			killShips();
+
 
 
 
@@ -131,8 +133,13 @@ void ofApp::swarmMove() {
 
 			ships[swarms[i][j]].swarmAngle += step;
 
-			ships[swarms[i][j]].pos.x = centerSwarm.x + ships[swarms[i][j]].targetRad * cos(ships[swarms[i][j]].swarmAngle);
-			ships[swarms[i][j]].pos.y = centerSwarm.y + ships[swarms[i][j]].targetRad * sin(ships[swarms[i][j]].swarmAngle);
+			//ships[swarms[i][j]].pos.x = centerSwarm.x + ships[swarms[i][j]].targetRad * cos(ships[swarms[i][j]].swarmAngle);
+			//ships[swarms[i][j]].pos.y = centerSwarm.y + ships[swarms[i][j]].targetRad * sin(ships[swarms[i][j]].swarmAngle);
+
+			ships[swarms[i][j]].pos.x = (centerSwarm.x) + (ships[swarms[i][j]].shiftNum/6 * sin((ships[swarms[i][j]].aNum * ships[swarms[i][j]].swarmAngle)));
+			ships[swarms[i][j]].pos.y = (centerSwarm.y)+((ships[swarms[i][j]].shiftNum/6) * sin(ships[swarms[i][j]].bNum * ships[swarms[i][j]].swarmAngle));
+
+
 
 			ships[swarms[i][j]].rotateAngle = ships[swarms[i][j]].swarmAngle;
 
@@ -146,10 +153,11 @@ void ofApp::killShips() {
 	for (int i = 0; i < ships.size(); i++) {
 		if (ships[i].health < 0) {
 
-			cout << "Ship " << i << "marked dead." << endl; 
+	//		cout << "Ship " << i << "marked dead." << endl; 
 			for (int j = 0; j < swarms[ships[i].swarmNum].size(); j++) {
 				if (ships[i].id == ships[swarms[ships[i].swarmNum][j]].id) {
-					cout << "Erased Ship " << i << " from swarm" << endl; 
+			//		cout << "Erased Ship " << i << " from swarm" << endl; 
+				
 					swarms[ships[i].swarmNum].erase(swarms[ships[i].swarmNum].begin() + j);
 				}
 			}
@@ -163,7 +171,7 @@ void ofApp::killShips() {
 			}
 
 			if (swarmDone) {
-				cout << "Swarm dead" << endl; 
+		//		cout << "Swarm dead" << endl; 
 				for (int j = 0; j < swarms[ships[i].swarmNum].size(); j++) {
 					ships[swarms[ships[i].swarmNum][j]].engagedT = false; 
 				}
@@ -185,15 +193,15 @@ void ofApp::fireShots() {
 				ships[i].attCount++;
 			}
 			else {
-				cout << "Ship " << i << " that is " << ships[i].playerShip << " Player ships is shooting at "; 
+		//		cout << "Ship " << i << " that is " << ships[i].playerShip << " Player ships is shooting at "; 
 				ships[i].attCount = 0;
 				if (ships[i].engagedM) {
 					int targetM; 
 					if (ships[i].playerShip) targetM = 1; else targetM = 0;
-					cout << "the " << targetM << "mothership" << endl; 
-					mothership[targetM].health -= ships[i].damage; 
+			//		cout << "the " << targetM << "mothership" << endl; 
+					mothership[targetM].health -= ofRandom(ships[i].damMin, ships[i].damMax); 
 					Shot s; 
-					s.setup(ships[i].pos, mothership[targetM].center);
+					s.setupM(ships[i], mothership[targetM].center);
 					shots.push_back(s);
 
 				}
@@ -201,10 +209,10 @@ void ofApp::fireShots() {
 					for (int j = 0; j < swarms[ships[i].swarmNum].size(); j++) { 
 					//	cout << "Checking swarm entry " << j << endl; 
 						if (ships[swarms[ships[i].swarmNum][j]].playerShip != ships[i].playerShip) {
-							cout << "the target ship " << swarms[ships[i].swarmNum][j] << endl;
-							ships[swarms[ships[i].swarmNum][j]].health -= ships[i].damage; 
+				//			cout << "the target ship " << swarms[ships[i].swarmNum][j] << endl;
+							ships[swarms[ships[i].swarmNum][j]].health -= ofRandom(ships[i].damMin, ships[i].damMax);
 							Shot s;
-							s.setup(ships[swarms[ships[i].swarmNum][j]].pos, ships[i].pos);
+							s.setup(ships[swarms[ships[i].swarmNum][j]], ships[i]);
 							shots.push_back(s);
 
 						}
@@ -251,6 +259,7 @@ void ofApp::findTarget(int _selected, ofPoint _motherTarget) {
 
 				ships[_selected].engagedT = true; ships[_selected].engagedM = false; 
 				ships[targetNum].engagedT = true; ships[targetNum].engagedM = false;
+				ships[_selected].tarNum = targetNum; ships[targetNum].tarNum = _selected; 
 				bool swarmSet = false;
 				for (int k = 0; k < swarms.size(); k++) {
 					for (int m = 0; m < swarms[k].size(); m++) {
@@ -284,13 +293,12 @@ void ofApp::findTarget(int _selected, ofPoint _motherTarget) {
 //
 
 		case 0:
-//			cout << "Found Mothership Target" << " "; 
 			ofPoint tempDiff;
 			targetSet = true;
 			tempDiff = _motherTarget - ofPoint(ships[_selected].pos.x, ships[_selected].pos.y);
 			if (tempDiff.length() < ships[_selected].motherRad) { ships[_selected].engagedM = true;}
 			if (ships[_selected].engagedM) {
-	//			cout << "Engaged with Mothership" << " "; 
+				cout << "Ship" << ships[_selected].id << " engaged with Mothership" << " "; 
 				float fixedY;
 				if (ships[_selected].playerShip) {
 					fixedY = 150;
@@ -316,7 +324,7 @@ void ofApp::findTarget(int _selected, ofPoint _motherTarget) {
 				*/
 			}
 			else {
-//				cout << "Going to mothership" << endl; 
+				cout << "Ship " << ships[_selected].id << " going to mothership from distance of" << tempDiff.length() << " and needs to be at " << ships[_selected].motherRad << endl;
 				ships[_selected].engagedM = false;
 				ships[_selected].addAttract(_motherTarget, ships[_selected].speedMod);
 

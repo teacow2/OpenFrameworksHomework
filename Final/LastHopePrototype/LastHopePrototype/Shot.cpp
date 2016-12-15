@@ -9,11 +9,19 @@ Shot::Shot(){
 }
 
 
-void Shot::setup(ofPoint _origin, ofPoint _dest) {
-	origin = _origin; 
-	dest = _dest; 
+void Shot::setup(Ship _tar, Ship _shoot) {
+	target = _tar; 
+	shooter = _shoot; 
+	mShot = false; 
 
 } 
+
+void Shot::setupM(Ship _tar, ofPoint _dest) {
+	target = _tar;
+	dest = _dest;
+	mShot = true;
+}
+
 
 void Shot::update() {
 	count++; 
@@ -23,5 +31,5 @@ void Shot::update() {
 void Shot::draw() {
 
 	ofSetColor(255);
-	ofDrawLine(origin, dest);
+	if (mShot) ofDrawLine(target.pos, dest); else ofDrawLine(target.pos, shooter.pos);
 }
